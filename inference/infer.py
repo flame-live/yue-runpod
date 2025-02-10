@@ -489,3 +489,13 @@ replace_low_freq_with_energy_matched(
     c_file=os.path.join(args.output_dir, os.path.basename(recons_mix)),
     cutoff_freq=5500.0
 )
+
+def main(args_list=None):
+    if args_list:
+        args = parser.parse_args(args_list)
+    else:
+        args = parser.parse_args()
+    # Rest of the existing code...
+
+if __name__ == "__main__":
+    main()
