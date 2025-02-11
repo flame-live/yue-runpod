@@ -7,12 +7,25 @@ RUN apt-get update && \
     apt-get install -y git-lfs && \
     git lfs install
 
-# Install Python dependencies with trusted host flag
+# Install dependencies using conda
 COPY requirements.txt .
-RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
-
-# Install additional dependencies
-RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org runpod flash-attn --no-build-isolation
+RUN conda install -y -c conda-forge \
+    omegaconf \
+    torchaudio \
+    einops \
+    numpy \
+    transformers \
+    sentencepiece \
+    tqdm \
+    tensorboard \
+    scipy=1.10.1 \
+    accelerate && \
+    pip install --no-cache-dir \
+    descript-audiotools>=0.7.2 \
+    descript-audio-codec \
+    runpod>=1.5.0 \
+    huggingface-hub>=0.19.0 \
+    flash-attn --no-build-isolation
 
 # Copy local files
 COPY . /app/YuE/inference/
