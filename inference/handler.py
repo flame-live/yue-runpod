@@ -22,14 +22,16 @@ def write_text_file(content, file_path):
 
 def handler(event):
     try:
-        # Setup HF token if provided
-        if "HF_TOKEN" in os.environ:
+        # Use default models or override from environment
+        stage1_model = os.environ.get("STAGE1_MODEL", "m-a-p/YuE-s1-7B-anneal-en-cot")
+        stage2_model = os.environ.get("STAGE2_MODEL", "m-a-p/YuE-s2-1B-general")
+        
+        # Setup HF token only if provided and custom models are specified
+        if "HF_TOKEN" in os.environ and (
+            stage1_model != "m-a-p/YuE-s1-7B-anneal-en-cot" or 
+            stage2_model != "m-a-p/YuE-s2-1B-general"
+        ):
             login(os.environ["HF_TOKEN"])
-            stage1_model = os.environ.get("STAGE1_MODEL", "m-a-p/YuE-s1-7B-anneal-en-cot")
-            stage2_model = os.environ.get("STAGE2_MODEL", "m-a-p/YuE-s2-1B-general")
-        else:
-            # Fallback to public models or raise error
-            raise ValueError("HF_TOKEN environment variable is required")
 
         # Create temp directory for this run
         with tempfile.TemporaryDirectory() as temp_dir:

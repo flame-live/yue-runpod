@@ -1,4 +1,4 @@
-FROM runpod/pytorch:2.1.0-py3.10-cuda11.8.0
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
 
 WORKDIR /app
 
@@ -7,10 +7,12 @@ RUN apt-get update && \
     apt-get install -y git-lfs && \
     git lfs install
 
-# Install Python dependencies
+# Install Python dependencies with trusted host flag
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install runpod flash-attn --no-build-isolation
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
+
+# Install additional dependencies
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org runpod flash-attn --no-build-isolation
 
 # Copy local files
 COPY . /app/YuE/inference/
