@@ -7,9 +7,12 @@ RUN apt-get update && \
     apt-get install -y git-lfs && \
     git lfs install
 
-# Install dependencies using conda
+# Configure conda to skip SSL verification
+RUN conda config --set ssl_verify false
+
+# Install dependencies using conda with --insecure flag
 COPY requirements.txt .
-RUN conda install -y -c conda-forge \
+RUN conda install -y --insecure -c conda-forge \
     omegaconf \
     torchaudio \
     einops \
@@ -20,7 +23,9 @@ RUN conda install -y -c conda-forge \
     tensorboard \
     scipy=1.10.1 \
     accelerate && \
-    pip install --no-cache-dir \
+    PYTHONWARNINGS="ignore:Unverified HTTPS request" pip install --no-cache-dir \
+    --trusted-host pypi.org \
+    --trusted-host files.pythonhosted.org \
     descript-audiotools>=0.7.2 \
     descript-audio-codec \
     runpod>=1.5.0 \
@@ -32,10 +37,11 @@ COPY . /app/YuE/inference/
 
 # Get xcodec_mini_infer
 RUN cd /app/YuE/inference && \
-    git clone https://huggingface.co/m-a-p/xcodec_mini_infer
+    GIT_SSL_NO_VERIFY=true git clone https://huggingface.co/m-a-p/xcodec_mini_infer
 
-# Download model checkpoints
-RUN python -c "from transformers import AutoModelForCausalLM; AutoModelForCausalLM.from_pretrained('m-a-p/YuE-s1-7B-anneal-en-cot'); AutoModelForCausalLM.from_pretrained('m-a-p/YuE-s2-1B-general')"
+# Download model checkpoints with SSL verification disabled
+ENV CURL_CA_BUNDLE=""
+RUN python -c "from transformers import AutoModelForCausalLM; AutoModelForCausalLM.from_pretrained('m-a-p/YuE-s1-7B-anneal-en-cot', trust_remote_code=True); AutoModelForCausalLM.from_pretrained('m-a-p/YuE-s2-1B-general', trust_remote_code=True)"
 
 WORKDIR /app/YuE/inference
 
